@@ -38,7 +38,7 @@ const Login = () => {
     if (isLogin) {
       // 🔹 LOGIN
       res = await axios.post(
-        "http://localhost:5000/api/users/login",
+        "https://chat-server-six.vercel.app/api/users/login",
         {
           email: formData.email,
           password: formData.password,
@@ -47,7 +47,7 @@ const Login = () => {
     } else {
       // 🔹 REGISTER
       res = await axios.post(
-        "http://localhost:5000/api/users/register",
+        "https://chat-server-six.vercel.app/api/users/register",
         formData
       );
     }
