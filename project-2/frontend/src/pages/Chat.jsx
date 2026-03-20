@@ -21,7 +21,7 @@ const Chat = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await axios.get(`https://chat-server-six.vercel.app/api/users`);
+        const res = await axios.get(`https://chat-server-six.vercel.app/api/users` || `http://localhost:5000/api/users`);
 
         // নিজের user বাদ দাও
         setUsers(res.data.filter((u) => u._id !== user._id));
