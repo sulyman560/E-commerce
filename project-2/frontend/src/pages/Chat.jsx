@@ -57,7 +57,7 @@ const Chat = () => {
 
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/messages/${user._id}/${selectedUser._id}`
+        `https://chat-server-six.vercel.app/api/messages/${user._id}/${selectedUser._id}` || `http://localhost:5000/api/messages/${user._id}/${selectedUser._id}`
       );
 
       setMessages(res.data);
