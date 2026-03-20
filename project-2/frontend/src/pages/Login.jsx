@@ -47,7 +47,7 @@ const Login = () => {
     } else {
       // 🔹 REGISTER
       res = await axios.post(
-        "https://chat-server-six.vercel.app/api/users/register",
+        "https://chat-server-six.vercel.app/api/users/register" || `http://localhost:5000/api/users/register`,
         formData
       );
     }
