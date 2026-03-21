@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import Loading from '../components/Loading';
 
 const Login = () => {
+  const API = "https://chat-server-six.vercel.app";
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const { user, login } = useContext(AuthContext);
@@ -39,7 +40,7 @@ const Login = () => {
     if (isLogin) {
       // 🔹 LOGIN
       res = await axios.post(
-         `http://localhost:5000/api/users/login` || `https://chat-server-six.vercel.app/api/users/login`,
+        `${API}/api/users/login`,
         {
           email: formData.email,
           password: formData.password,
@@ -48,7 +49,7 @@ const Login = () => {
     } else {
       // 🔹 REGISTER
       res = await axios.post(
-         `http://localhost:5000/api/users/register` || `https://chat-server-six.vercel.app/api/users/register`,
+        `${API}/api/users/register`,
         formData
       );
     }
