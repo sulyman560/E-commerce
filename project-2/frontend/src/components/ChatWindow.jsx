@@ -14,7 +14,7 @@ const ChatWindow = ({ messages, user, sendMessage, input, setInput }) => {
         {messages.map((msg, index) => (
           <div
             key={index}
-            className={`flex justify-between p-2 rounded max-w-xs ${msg.sender === user.username
+            className={`flex justify-between p-2 rounded max-w-xs  ${ msg.senderId === user._id
                 ? "bg-blue-400 text-white ml-auto"
                 : "bg-gray-300 text-black"
               }`}

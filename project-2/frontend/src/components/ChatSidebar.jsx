@@ -50,7 +50,7 @@ const ChatSidebar = ({ sidebarOpen, setSidebarOpen, users, selectUser, activeUse
         })}
 
         <div className='absolute bottom-6 left-2 flex justify-between items-center gap-6 text-sm text-gray-600'>
-          <p className='text-md font-semibold text-gray-500 border px-2 py-1.5 rounded-lg'>Welcome, <span className='text-blue-500'>{user.username}!</span></p>
+          <p className='text-md font-semibold text-gray-500 border px-4 py-2 rounded-lg'>Welcome, <span className='text-blue-500'>{user.username}!</span></p>
           <button onClick={() => {
             logout();
             Navigate(`/login`);
