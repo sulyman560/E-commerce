@@ -50,6 +50,12 @@ let onlineUsers = [];
 io.on("connection", (socket) => {
   console.log("user connected:", socket.id);
 
+  socket.on("sendMessage", (data) => {
+  // ❌ DB save remove
+  // শুধু realtime send
+  socket.broadcast.emit("getMessage", data);
+});
+
   // user online
   socket.on("addUser", async (userId) => {
     socket.userId = userId;

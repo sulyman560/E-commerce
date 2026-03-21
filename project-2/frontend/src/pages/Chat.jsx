@@ -21,7 +21,7 @@ const Chat = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await axios.get(`https://chat-server-six.vercel.app/api/users` || `http://localhost:5000/api/users`);
+        const res = await axios.get('http://localhost:5000/api/users');
 
         // নিজের user বাদ দাও
         setUsers(res.data.filter((u) => u._id !== user._id));
@@ -42,14 +42,22 @@ const Chat = () => {
 
   // 🔹 3. receive message
   useEffect(() => {
-    socket.on("getMessage", (data) => {
-      if (activeUser && data.senderId === activeUser._id) {
-        setMessages((prev) => [...prev, data]);
-      }
-    });
+  const handleMessage = (data) => {
+    // নিজের message ignore
+    if (data.senderId === user._id) return;
 
-    return () => socket.off("getMessage");
-  }, [activeUser]);
+    // শুধু active chat এর message add করো
+    if (activeUser && data.senderId === activeUser._id) {
+      setMessages((prev) => [...prev, data]);
+    }
+  };
+
+  socket.on("getMessage", handleMessage);
+
+  return () => {
+    socket.off("getMessage", handleMessage); // 🔥 IMPORTANT
+  };
+}, [activeUser, user]);
 
   // 🔹 4. user select → DB থেকে message load
   const selectUser = async (selectedUser) => {
@@ -57,7 +65,7 @@ const Chat = () => {
 
     try {
       const res = await axios.get(
-        `https://chat-server-six.vercel.app/api/messages/${user._id}/${selectedUser._id}` || `http://localhost:5000/api/messages/${user._id}/${selectedUser._id}`
+        `http://localhost:5000/api/messages/${user._id}/${selectedUser._id}`
       );
 
       setMessages(res.data);
@@ -67,34 +75,43 @@ const Chat = () => {
   };
 
   // 🔹 5. send message
-  const sendMessage = () => {
-    if (!input.trim() || !activeUser) return;
+  const sendMessage = async () => {
+  if (!input.trim() || !activeUser) return;
 
-    const msgData = {
-      senderId: user._id,
-      receiverId: activeUser._id,
-      text: input,
-    };
-
-    // socket send
-    socket.emit("sendMessage", msgData);
-
-    // UI update
-    setMessages((prev) => [...prev, msgData]);
-    setInput("");
+  const msgData = {
+    senderId: user._id,
+    receiverId: activeUser._id,
+    text: input,
   };
 
-  // socket listener
-useEffect(() => {
-  socket.on("updateUserStatus", ({ userId, online, lastSeen }) => {
-    setUserStatus(prev => ({
-      ...prev,
-      [userId]: { online, lastSeen }
-    }));
-  });
+  try {
+    const res = await axios.post(
+      "http://localhost:5000/api/messages",
+      msgData
+    );
 
-  return () => socket.off("updateUserStatus");
-}, []);
+    // শুধু API response add করো
+    setMessages((prev) => [...prev, res.data]);
+
+    socket.emit("sendMessage", res.data);
+
+    setInput("");
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+  // socket listener
+  useEffect(() => {
+    socket.on("updateUserStatus", ({ userId, online, lastSeen }) => {
+      setUserStatus(prev => ({
+        ...prev,
+        [userId]: { online, lastSeen }
+      }));
+    });
+
+    return () => socket.off("updateUserStatus");
+  }, []);
 
   return (
     <div className="flex h-screen rounded-lg">

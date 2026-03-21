@@ -34,9 +34,9 @@ function App() {
         <div className='px-6 md:px-16 lg:px-24 xl:px-32'>
 
           <Routes>
-            <Route path="/login" element={!user ? <Login /> : <Navigate to="/chat" />} />
-            <Route path="/chat" element={user ? <Chat /> : <Navigate to="/login" />} />
-            <Route path="*" element={<Navigate to="/login" />} />
+            <Route path="/" element={!user ? <Login /> : <Navigate to="/chat" />} />
+            <Route path="/chat" element={user ? <Chat /> : <Navigate to="/" />} />
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
 
         </div>
