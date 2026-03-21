@@ -17,7 +17,7 @@ const ChatSidebar = ({ users, selectUser, activeUser, userStatus }) => {
               {status?.online ? (
                 <span className="w-3 h-3 bg-green-500 rounded-full inline-block"></span>
               ) : status?.lastSeen ? (
-                <small className="text-gray-500 text-xs">
+                <small className="text-red-500 text-xs">
                   {Math.floor((new Date() - new Date(status.lastSeen)) / 60000)} min ago
                 </small>
               ) : null}
