@@ -20,14 +20,20 @@ function App() {
       <div className='text-default min-h-screen flex items-center justify-center'>
 
         {
-          user ?
-            <button onClick={() => {
-              logout();
-              Navigate(`/login`);
-              
-            }} className = "cursor-pointer text-md text-white rounded-md bg-red-600 hover:bg-red-700 transition px-4 py-2 absolute top-5 right-10">
-              Logout
-            </button>
+          user ? (
+            <div className='absolute top-4 right-4 flex items-center gap-4 text-sm text-gray-600'>
+              <p className='text-md font-semibold text-gray-200 border px-2 py-1.5 rounded-full'>Welcome, <span className='text-blue-500'>{user.username}!</span></p>
+              <button onClick={() => {
+                logout();
+                Navigate(`/login`);
+
+              }} className="cursor-pointer text-md text-white rounded-md bg-red-600 hover:bg-red-700 transition px-4 py-2"
+              >
+                Logout
+              </button>
+            </div>
+          )
+
             :
             ''
         }

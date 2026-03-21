@@ -1,6 +1,6 @@
 const ChatSidebar = ({ users, selectUser, activeUser, userStatus }) => {
   return (
-    <div className="w-64 bg-gray-200 p-4">
+    <div className="w-64 bg-gray-400 p-4">
       <h2 className="text-2xl font-bold mb-4">Users</h2>
 
       {users.map(u => {
