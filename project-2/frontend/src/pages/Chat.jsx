@@ -4,6 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import { socket } from "../socket";
 import ChatSidebar from "../components/ChatSidebar";
 import ChatWindow from "../components/ChatWindow";
+import { Menu, X } from 'lucide-react'
 
 const Chat = () => {
   const { user } = useContext(AuthContext);
@@ -113,14 +114,23 @@ const Chat = () => {
     return () => socket.off("updateUserStatus");
   }, []);
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
-    <div className="flex h-screen rounded-lg">
+    <div className="w-full flex h-screen backdrop-blur-sm border border-gray-800 rounded-2xl">
       <ChatSidebar
+        sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}
         users={users}
         selectUser={selectUser}
         activeUser={activeUser}
         userStatus={userStatus}
       />
+
+      {
+        sidebarOpen ? 
+        <X onClick={()=> setSidebarOpen(false)} className='cursor-pointer absolute top-3 right-3 p-2 z-100 bg-white rounded-md shadow w-10 h-10 text-gray-600 sm:hidden'/>
+        : <Menu  onClick={()=> setSidebarOpen(true)} className='cursor-pointer absolute top-3 right-3 p-2 z-100 bg-white rounded-md shadow w-10 h-10 text-gray-600 sm:hidden' />
+      }
 
       <ChatWindow
         messages={messages}
