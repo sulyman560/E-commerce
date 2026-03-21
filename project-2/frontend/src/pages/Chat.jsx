@@ -133,6 +133,7 @@ const Chat = () => {
       }
 
       <ChatWindow
+        sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}
         messages={messages}
         user={user}
         activeUser={activeUser}

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 
-const ChatWindow = ({ messages, user, sendMessage, input, setInput }) => {
+const ChatWindow = ({setSidebarOpen, messages, user, sendMessage, input, setInput }) => {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -8,7 +8,7 @@ const ChatWindow = ({ messages, user, sendMessage, input, setInput }) => {
   }, [messages]);
 
   return (
-    <div className="backdrop-blur-sm flex flex-col flex-1">
+    <div onClick={()=> setSidebarOpen(false)} className="backdrop-blur-sm flex flex-col flex-1">
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
         {messages.map((msg, index) => (
