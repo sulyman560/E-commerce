@@ -7,7 +7,7 @@ import ChatWindow from "../components/ChatWindow";
 import { Menu, X } from 'lucide-react'
 
 const Chat = () => {
-  const { user } = useContext(AuthContext);
+  const { user, API } = useContext(AuthContext);
 
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
@@ -24,7 +24,7 @@ const Chat = () => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const res = await axios.get('http://localhost:5000/api/users' || 'https://chat-server-six.vercel.app/api/users');
+        const res = await axios.get(`${API}/api/users`);
 
         // নিজের user বাদ দাও
         setUsers(res.data.filter((u) => u._id !== user._id));
@@ -69,7 +69,7 @@ const Chat = () => {
 
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/messages/${user._id}/${selectedUser._id}` || `https://chat-server-six.vercel.app/api/messages/${user._id}/${selectedUser._id}`
+        `${API}/api/messages/${user._id}/${selectedUser._id}`
       );
 
       setMessages(res.data);
@@ -90,7 +90,7 @@ const Chat = () => {
 
   try {
     const res = await axios.post(
-      "http://localhost:5000/api/messages" || "https://chat-server-six.vercel.app/api/messages",
+      `${API}/api/messages`,
       msgData
     );
 

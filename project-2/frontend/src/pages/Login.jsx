@@ -7,10 +7,9 @@ import { useNavigate } from "react-router-dom";
 import Loading from '../components/Loading';
 
 const Login = () => {
-  const API = "https://chat-server-six.vercel.app";
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const { user, login } = useContext(AuthContext);
+  const { user, login, API } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [state, setState] = React.useState("login")

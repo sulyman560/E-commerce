@@ -12,6 +12,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  const API = "https://chat-server-six.vercel.app";
   const login = (userData) => {
     localStorage.setItem("chatUser", JSON.stringify(userData));
     setUser(userData);
@@ -23,7 +24,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, API }}>
       {children}
     </AuthContext.Provider>
   );
