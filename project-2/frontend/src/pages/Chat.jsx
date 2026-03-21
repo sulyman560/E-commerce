@@ -9,6 +9,7 @@ import { Menu, X } from 'lucide-react'
 const Chat = () => {
   const { user } = useContext(AuthContext);
 
+  const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const [activeUser, setActiveUser] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -22,6 +23,7 @@ const Chat = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
+        setLoading(true);
         const res = await axios.get('http://localhost:5000/api/users');
 
         // নিজের user বাদ দাও
@@ -29,6 +31,7 @@ const Chat = () => {
       } catch (err) {
         console.log(err);
       }
+      setLoading(false);
     };
 
     if (user) fetchUsers();
@@ -119,6 +122,7 @@ const Chat = () => {
   return (
     <div className="w-full flex h-screen backdrop-blur-sm border border-gray-800 rounded-2xl">
       <ChatSidebar
+        loading={loading} setLoading={setLoading}
         sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}
         users={users}
         selectUser={selectUser}

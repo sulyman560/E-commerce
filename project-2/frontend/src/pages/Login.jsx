@@ -4,6 +4,7 @@ import { AuthContext } from '../context/AuthContext'
 import { useContext } from 'react';
 import { useState } from 'react';
 import { useNavigate } from "react-router-dom";
+import Loading from '../components/Loading';
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -55,6 +56,7 @@ const Login = () => {
     // success
     login(res.data.user);
     navigate("/chat");
+  
 
   } catch (err) {
     console.log(err.response?.data);

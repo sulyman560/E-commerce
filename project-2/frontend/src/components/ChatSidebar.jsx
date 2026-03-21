@@ -1,8 +1,9 @@
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { assets } from "../assets/assets";
+import Loading from "./Loading";
 
-const ChatSidebar = ({ sidebarOpen, setSidebarOpen, users, selectUser, activeUser, userStatus }) => {
+const ChatSidebar = ({ loading, setLoading, sidebarOpen, setSidebarOpen, users, selectUser, activeUser, userStatus }) => {
   const { user, logout, Navigate } = useContext(AuthContext);
   return (
     <div className={`bg-white w-90 xl:w-95 p-4 border-r border-gray-200 flex flex-col justify-between items-center 
@@ -18,7 +19,7 @@ const ChatSidebar = ({ sidebarOpen, setSidebarOpen, users, selectUser, activeUse
 
         {users.map(u => {
           const status = userStatus[u._id];
-          return (
+          return !loading ? (
             <div
               key={u._id}
               onClick={() => selectUser(u)}
@@ -52,7 +53,7 @@ const ChatSidebar = ({ sidebarOpen, setSidebarOpen, users, selectUser, activeUse
               </span>
 
             </div>
-          );
+          ) : <Loading />;
         })}
 
         <div className='absolute bottom-6 left-2 gap-5 flex justify-between items-center text-sm text-gray-600'>
