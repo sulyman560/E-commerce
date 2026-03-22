@@ -1,8 +1,3 @@
 import { io } from "socket.io-client";
 
-export const socket = io("https://chat-server-5zt5.onrender.com", {
-  transports: ["websocket"], // 🔥 MUST
-  reconnection: true,
-  reconnectionAttempts: Infinity,
-  reconnectionDelay: 1000,
-});
+export const socket = io("http://localhost:5000"); // backend URL
