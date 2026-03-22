@@ -23,7 +23,7 @@ const ChatSidebar = ({ loading, sidebarOpen, setSidebarOpen, users, selectUser, 
 
         {users.map(u => {
           const status = userStatus[u._id];
-          return !loading ? (
+          return (
             <div
               key={u._id}
               onClick={() => selectUser(u)}
@@ -47,7 +47,7 @@ const ChatSidebar = ({ loading, sidebarOpen, setSidebarOpen, users, selectUser, 
                 ) : null}
               </span>
             </div>
-          ) : <Loading />;
+          )
         })}
 
         <div className='absolute bottom-6 left-2 gap-5 flex justify-between items-center text-sm text-gray-600'>

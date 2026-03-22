@@ -67,6 +67,7 @@ const Chat = () => {
   // user status listener
   useEffect(() => {
     socket.on("allUsersStatus", (users) => {
+      console.log("STATUS:", users); // 👈 এটা add করো
       const statusObj = {};
       users.forEach(u => {
         statusObj[u._id] = {
@@ -79,6 +80,26 @@ const Chat = () => {
 
     return () => socket.off("allUsersStatus");
   }, []);
+  socket.on("connect", () => {
+    console.log("Socket Connected:", socket.id);
+  });
+  useEffect(() => {
+  if (user) {
+    console.log("ADDING USER:", user._id); // 👈 এটা add করো
+    socket.emit("addUser", user._id);
+  }
+}, [user]);
+useEffect(() => {
+  if (!user) return;
+
+  // 🔥 connect হলে addUser আবার call হবে
+  socket.on("connect", () => {
+    console.log("RECONNECTED");
+    socket.emit("addUser", user._id);
+  });
+
+  return () => socket.off("connect");
+}, [user]);
 
   return (
     <div className="w-full flex h-screen backdrop-blur-sm border border-gray-800 rounded-2xl">

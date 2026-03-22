@@ -5,8 +5,6 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./configs/db.js";
 import User from "./models/User.js";
-import Message from "./models/Message.js";
-
 dotenv.config();
 await connectDB();
 
@@ -34,19 +32,24 @@ let onlineUsers = new Map(); // { userId: socketId }
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
-  // user online
+  // 🔥 NEW: user join
   socket.on("addUser", async (userId) => {
     socket.userId = userId;
-    onlineUsers.set(userId, socket.id);
 
-    await User.findByIdAndUpdate(userId, { online: true });
+    await User.findByIdAndUpdate(userId, {
+      online: true,
+      lastSeen: null,
+    });
 
-    // সব user status পাঠাও
-    const users = await User.find().select("_id online lastSeen");
-    io.emit("allUsersStatus", users);
+    // 🔥 only update one user
+    io.emit("updateUserStatus", {
+      userId,
+      online: true,
+      lastSeen: null,
+    });
   });
 
-  // user offline
+  // 🔥 disconnect
   socket.on("disconnect", async () => {
     if (socket.userId) {
       await User.findByIdAndUpdate(socket.userId, {
@@ -54,11 +57,14 @@ io.on("connection", (socket) => {
         lastSeen: new Date(),
       });
 
-      onlineUsers.delete(socket.userId);
-
-      const users = await User.find().select("_id online lastSeen");
-      io.emit("allUsersStatus", users);
+      io.emit("updateUserStatus", {
+        userId: socket.userId,
+        online: false,
+        lastSeen: new Date(),
+      });
     }
+
+    console.log("Disconnected:", socket.id);
   });
 
   // send message
@@ -71,4 +77,4 @@ io.on("connection", (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server running on port http://localhost:${PORT}`));
