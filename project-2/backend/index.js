@@ -34,16 +34,31 @@ let onlineUsers = new Map(); // { userId: socketId }
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
-  // add user online
+  // user online
   socket.on("addUser", async (userId) => {
-    onlineUsers.set(userId, socket.id);
     socket.userId = userId;
+    onlineUsers.set(userId, socket.id);
 
     await User.findByIdAndUpdate(userId, { online: true });
 
-    // send all users' status to everyone
+    // সব user status পাঠাও
     const users = await User.find().select("_id online lastSeen");
     io.emit("allUsersStatus", users);
+  });
+
+  // user offline
+  socket.on("disconnect", async () => {
+    if (socket.userId) {
+      await User.findByIdAndUpdate(socket.userId, {
+        online: false,
+        lastSeen: new Date(),
+      });
+
+      onlineUsers.delete(socket.userId);
+
+      const users = await User.find().select("_id online lastSeen");
+      io.emit("allUsersStatus", users);
+    }
   });
 
   // send message
@@ -52,18 +67,6 @@ io.on("connection", (socket) => {
     if (receiverSocket) {
       io.to(receiverSocket).emit("getMessage", data);
     }
-  });
-
-  // disconnect → offline
-  socket.on("disconnect", async () => {
-    if (socket.userId) {
-      await User.findByIdAndUpdate(socket.userId, { online: false, lastSeen: new Date() });
-      onlineUsers.delete(socket.userId);
-
-      const users = await User.find().select("_id online lastSeen");
-      io.emit("allUsersStatus", users);
-    }
-    console.log("User disconnected:", socket.id);
   });
 });
 
