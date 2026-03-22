@@ -4,76 +4,68 @@ import { Server } from "socket.io";
 import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./configs/db.js";
+import User from "./models/User.js";
+import Message from "./models/Message.js";
+
 dotenv.config();
-
-// routes import
-import userRoutes from "./routes/users.js";
-import messageRoutes from "./routes/messages.js";
-
-
-const port = process.env.PORT || 5000;
+await connectDB();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 🔹 routes use করো এখানে
+// routes
+import userRoutes from "./routes/users.js";
+import messageRoutes from "./routes/messages.js";
 app.use("/api/users", userRoutes);
 app.use("/api/messages", messageRoutes);
 
+// test api
+app.get("/", (req, res) => res.send("Server running"));
 
-//Database connection
-await connectDB();
-
-// Example API
-app.get("/", (req, res) => {
-  res.send("Server is running");
-});
-
-// create http server
+// http server + socket
 const server = http.createServer(app);
-
-// setup socket.io
 const io = new Server(server, {
-  cors: {
-    origin: "*", // frontend URL দিতে পারো, এখন dev-এর জন্য *
-    methods: ["GET", "POST"],
-  },
+  cors: { origin: "*", methods: ["GET", "POST"] },
 });
 
-// 🔹 এখানেই socket logic বসবে
-import Message from "./models/Message.js";
-import User from "./models/User.js";
-
-let onlineUsers = [];
+let onlineUsers = new Map(); // { userId: socketId }
 
 io.on("connection", (socket) => {
-  console.log("user connected:", socket.id);
+  console.log("User connected:", socket.id);
 
-  // user online
+  // add user online
   socket.on("addUser", async (userId) => {
+    onlineUsers.set(userId, socket.id);
     socket.userId = userId;
+
     await User.findByIdAndUpdate(userId, { online: true });
 
-    // সব users এর status emit করো
+    // send all users' status to everyone
     const users = await User.find().select("_id online lastSeen");
     io.emit("allUsersStatus", users);
   });
 
-  // user offline
+  // send message
+  socket.on("sendMessage", (data) => {
+    const receiverSocket = onlineUsers.get(data.receiverId);
+    if (receiverSocket) {
+      io.to(receiverSocket).emit("getMessage", data);
+    }
+  });
+
+  // disconnect → offline
   socket.on("disconnect", async () => {
     if (socket.userId) {
-      await User.findByIdAndUpdate(socket.userId, {
-        online: false,
-        lastSeen: new Date(),
-      });
+      await User.findByIdAndUpdate(socket.userId, { online: false, lastSeen: new Date() });
+      onlineUsers.delete(socket.userId);
 
       const users = await User.find().select("_id online lastSeen");
       io.emit("allUsersStatus", users);
     }
-    console.log("user disconnected");
+    console.log("User disconnected:", socket.id);
   });
 });
 
-// start server
-server.listen(port, () => console.log(`Server running on port ${port}`));
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
