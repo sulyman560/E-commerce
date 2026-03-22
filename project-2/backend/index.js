@@ -50,23 +50,15 @@ let onlineUsers = [];
 io.on("connection", (socket) => {
   console.log("user connected:", socket.id);
 
-  socket.on("sendMessage", (data) => {
-  // ❌ DB save remove
-  // শুধু realtime send
-  socket.broadcast.emit("getMessage", data);
-});
-
   // user online
   socket.on("addUser", async (userId) => {
-  socket.userId = userId;
-  await User.findByIdAndUpdate(userId, { online: true });
+    socket.userId = userId;
+    await User.findByIdAndUpdate(userId, { online: true });
 
-  // সব user status পাঠাও
-  const users = await User.find().select("_id online lastSeen");
-  io.emit("allUsersStatus", users);
-
-  io.emit("updateUserStatus", { userId, online: true });
-});
+    // সব users এর status emit করো
+    const users = await User.find().select("_id online lastSeen");
+    io.emit("allUsersStatus", users);
+  });
 
   // user offline
   socket.on("disconnect", async () => {
@@ -75,11 +67,9 @@ io.on("connection", (socket) => {
         online: false,
         lastSeen: new Date(),
       });
-      io.emit("updateUserStatus", {
-        userId: socket.userId,
-        online: false,
-        lastSeen: new Date(),
-      });
+
+      const users = await User.find().select("_id online lastSeen");
+      io.emit("allUsersStatus", users);
     }
     console.log("user disconnected");
   });

@@ -46,22 +46,22 @@ const Chat = () => {
 
   // 🔹 3. receive message
   useEffect(() => {
-  const handleMessage = (data) => {
-    // নিজের message ignore
-    if (data.senderId === user._id) return;
+    const handleMessage = (data) => {
+      // নিজের message ignore
+      if (data.senderId === user._id) return;
 
-    // শুধু active chat এর message add করো
-    if (activeUser && data.senderId === activeUser._id) {
-      setMessages((prev) => [...prev, data]);
-    }
-  };
+      // শুধু active chat এর message add করো
+      if (activeUser && data.senderId === activeUser._id) {
+        setMessages((prev) => [...prev, data]);
+      }
+    };
 
-  socket.on("getMessage", handleMessage);
+    socket.on("getMessage", handleMessage);
 
-  return () => {
-    socket.off("getMessage", handleMessage); // 🔥 IMPORTANT
-  };
-}, [activeUser, user]);
+    return () => {
+      socket.off("getMessage", handleMessage); // 🔥 IMPORTANT
+    };
+  }, [activeUser, user]);
 
   // 🔹 4. user select → DB থেকে message load
   const selectUser = async (selectedUser) => {
@@ -80,54 +80,43 @@ const Chat = () => {
 
   // 🔹 5. send message
   const sendMessage = async () => {
-  if (!input.trim() || !activeUser) return;
+    if (!input.trim() || !activeUser) return;
 
-  const msgData = {
-    senderId: user._id,
-    receiverId: activeUser._id,
-    text: input,
+    const msgData = {
+      senderId: user._id,
+      receiverId: activeUser._id,
+      text: input,
+    };
+
+    try {
+      const res = await axios.post(
+        `${API}/api/messages`,
+        msgData
+      );
+
+      // শুধু API response add করো
+      setMessages((prev) => [...prev, res.data]);
+
+      socket.emit("sendMessage", res.data);
+
+      setInput("");
+    } catch (err) {
+      console.log(err);
+    }
   };
-
-  try {
-    const res = await axios.post(
-      `${API}/api/messages`,
-      msgData
-    );
-
-    // শুধু API response add করো
-    setMessages((prev) => [...prev, res.data]);
-
-    socket.emit("sendMessage", res.data);
-
-    setInput("");
-  } catch (err) {
-    console.log(err);
-  }
-};
 
   // socket listener
   useEffect(() => {
-    socket.on("updateUserStatus", ({ userId, online, lastSeen }) => {
-      setUserStatus(prev => ({
-        ...prev,
-        [userId]: { online, lastSeen }
-      }));
+    socket.on("allUsersStatus", (users) => {
+      const statusObj = {};
+      users.forEach((u) => {
+        statusObj[u._id] = { online: u.online, lastSeen: u.lastSeen };
+      });
+      setUserStatus(statusObj);
     });
 
-    return () => socket.off("updateUserStatus");
+    return () => socket.off("allUsersStatus");
   }, []);
-
-  useEffect(() => {
-  socket.on("allUsersStatus", (users) => {
-    const statusObj = {};
-    users.forEach((u) => {
-      statusObj[u._id] = { online: u.online, lastSeen: u.lastSeen };
-    });
-    setUserStatus(statusObj);
-  });
-
-  return () => socket.off("allUsersStatus");
-}, []);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -143,9 +132,9 @@ const Chat = () => {
       />
 
       {
-        sidebarOpen ? 
-        <X onClick={()=> setSidebarOpen(false)} className='cursor-pointer absolute top-3 right-3 p-2 z-100 bg-white rounded-md shadow w-10 h-10 text-gray-600 sm:hidden'/>
-        : <Menu  onClick={()=> setSidebarOpen(true)} className='cursor-pointer absolute top-3 right-3 p-2 z-100 bg-white rounded-md shadow w-10 h-10 text-gray-600 sm:hidden' />
+        sidebarOpen ?
+          <X onClick={() => setSidebarOpen(false)} className='cursor-pointer absolute top-3 right-3 p-2 z-100 bg-white rounded-md shadow w-10 h-10 text-gray-600 sm:hidden' />
+          : <Menu onClick={() => setSidebarOpen(true)} className='cursor-pointer absolute top-3 right-3 p-2 z-100 bg-white rounded-md shadow w-10 h-10 text-gray-600 sm:hidden' />
       }
 
       <ChatWindow
