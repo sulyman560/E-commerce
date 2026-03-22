@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const API = "https://chat-server-six.vercel.app";
+  const API = "https://chat-server-5zt5.onrender.com";
   const login = (userData) => {
     localStorage.setItem("chatUser", JSON.stringify(userData));
     setUser(userData);
