@@ -84,22 +84,22 @@ const Chat = () => {
     console.log("Socket Connected:", socket.id);
   });
   useEffect(() => {
-  if (user) {
-    console.log("ADDING USER:", user._id); // 👈 এটা add করো
-    socket.emit("addUser", user._id);
-  }
-}, [user]);
-useEffect(() => {
-  if (!user) return;
+    if (user) {
+      console.log("ADDING USER:", user._id); // 👈 এটা add করো
+      socket.emit("addUser", user._id);
+    }
+  }, [user]);
+  useEffect(() => {
+    if (!user) return;
 
-  // 🔥 connect হলে addUser আবার call হবে
-  socket.on("connect", () => {
-    console.log("RECONNECTED");
-    socket.emit("addUser", user._id);
-  });
+    socket.on("connect", () => {
+      console.log("RECONNECTED");
+      socket.emit("addUser", user._id);
+    });
 
-  return () => socket.off("connect");
-}, [user]);
+    return () => socket.off("connect");
+  }, [user]);
+  console.log(userStatus);
 
   return (
     <div className="w-full flex h-screen backdrop-blur-sm border border-gray-800 rounded-2xl">

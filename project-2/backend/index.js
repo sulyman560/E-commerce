@@ -27,44 +27,55 @@ const io = new Server(server, {
   cors: { origin: "*", methods: ["GET", "POST"] },
 });
 
-let onlineUsers = new Map(); // { userId: socketId }
+let onlineUsers = [];
 
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
+  console.log("Socket Connected:", socket.id);
 
-  // user online
+  // 🔥 USER ONLINE
   socket.on("addUser", async (userId) => {
     socket.userId = userId;
-    onlineUsers.set(userId, socket.id);
 
-    await User.findByIdAndUpdate(userId, { online: true });
+    // list এ add করো
+    if (!onlineUsers.some(u => u.userId === userId)) {
+      onlineUsers.push({ userId, socketId: socket.id });
+    }
 
-    // সব user status পাঠাও
-    const users = await User.find().select("_id online lastSeen");
-    io.emit("allUsersStatus", users);
+    await User.findByIdAndUpdate(userId, {
+      online: true,
+      lastSeen: null,
+    });
+
+    io.emit("updateUserStatus", {
+      userId,
+      online: true,
+      lastSeen: null,
+    });
   });
 
-  // user offline
+  // 🔥 MESSAGE
+  socket.on("sendMessage", (data) => {
+    socket.broadcast.emit("getMessage", data);
+  });
+
+  // 🔥 USER OFFLINE
   socket.on("disconnect", async () => {
+    onlineUsers = onlineUsers.filter(u => u.socketId !== socket.id);
+
     if (socket.userId) {
       await User.findByIdAndUpdate(socket.userId, {
         online: false,
         lastSeen: new Date(),
       });
 
-      onlineUsers.delete(socket.userId);
-
-      const users = await User.find().select("_id online lastSeen");
-      io.emit("allUsersStatus", users);
+      io.emit("updateUserStatus", {
+        userId: socket.userId,
+        online: false,
+        lastSeen: new Date(),
+      });
     }
-  });
 
-  // send message
-  socket.on("sendMessage", (data) => {
-    const receiverSocket = onlineUsers.get(data.receiverId);
-    if (receiverSocket) {
-      io.to(receiverSocket).emit("getMessage", data);
-    }
+    console.log("Disconnected:", socket.id);
   });
 });
 
