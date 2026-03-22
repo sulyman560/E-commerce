@@ -28,7 +28,7 @@ const ChatSidebar = ({ loading, setLoading, sidebarOpen, setSidebarOpen, users, 
               <img src={assets.profile_icon} className="w-8 h-8" alt="Profile" />
               <span>
                 {
-                  status?.online ? (
+                  status?.online === 'true' ? (
                     <>
                       <span>{u.username} <span className="text-xs text-green-600">Active now</span></span>
                     </>

@@ -58,10 +58,15 @@ io.on("connection", (socket) => {
 
   // user online
   socket.on("addUser", async (userId) => {
-    socket.userId = userId;
-    await User.findByIdAndUpdate(userId, { online: true });
-    io.emit("updateUserStatus", { userId, online: true });
-  });
+  socket.userId = userId;
+  await User.findByIdAndUpdate(userId, { online: true });
+
+  // সব user status পাঠাও
+  const users = await User.find().select("_id online lastSeen");
+  io.emit("allUsersStatus", users);
+
+  io.emit("updateUserStatus", { userId, online: true });
+});
 
   // user offline
   socket.on("disconnect", async () => {

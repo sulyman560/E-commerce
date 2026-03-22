@@ -117,6 +117,18 @@ const Chat = () => {
     return () => socket.off("updateUserStatus");
   }, []);
 
+  useEffect(() => {
+  socket.on("allUsersStatus", (users) => {
+    const statusObj = {};
+    users.forEach((u) => {
+      statusObj[u._id] = { online: u.online, lastSeen: u.lastSeen };
+    });
+    setUserStatus(statusObj);
+  });
+
+  return () => socket.off("allUsersStatus");
+}, []);
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
