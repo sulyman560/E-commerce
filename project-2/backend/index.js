@@ -32,24 +32,19 @@ let onlineUsers = new Map(); // { userId: socketId }
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
-  // 🔥 NEW: user join
+  // user online
   socket.on("addUser", async (userId) => {
     socket.userId = userId;
+    onlineUsers.set(userId, socket.id);
 
-    await User.findByIdAndUpdate(userId, {
-      online: true,
-      lastSeen: null,
-    });
+    await User.findByIdAndUpdate(userId, { online: true });
 
-    // 🔥 only update one user
-    io.emit("updateUserStatus", {
-      userId,
-      online: true,
-      lastSeen: null,
-    });
+    // সব user status পাঠাও
+    const users = await User.find().select("_id online lastSeen");
+    io.emit("allUsersStatus", users);
   });
 
-  // 🔥 disconnect
+  // user offline
   socket.on("disconnect", async () => {
     if (socket.userId) {
       await User.findByIdAndUpdate(socket.userId, {
@@ -57,14 +52,11 @@ io.on("connection", (socket) => {
         lastSeen: new Date(),
       });
 
-      io.emit("updateUserStatus", {
-        userId: socket.userId,
-        online: false,
-        lastSeen: new Date(),
-      });
-    }
+      onlineUsers.delete(socket.userId);
 
-    console.log("Disconnected:", socket.id);
+      const users = await User.find().select("_id online lastSeen");
+      io.emit("allUsersStatus", users);
+    }
   });
 
   // send message
