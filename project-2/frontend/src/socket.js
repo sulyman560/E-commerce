@@ -1,3 +1,3 @@
 import { io } from "socket.io-client";
 
-export const socket = io("http://localhost:5000"); // backend URL
+export const socket = io("https://chat-server-six.vercel.app"); // backend URL
