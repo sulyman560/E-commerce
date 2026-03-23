@@ -1,3 +1,4 @@
+import { socket } from "../socket"; // path ঠিক করে নিও
 import React from 'react'
 import axios from 'axios'
 import { AuthContext } from '../context/AuthContext'
@@ -31,38 +32,43 @@ const Login = () => {
 
   // submit
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    let res;
+    try {
+      let res;
 
-    if (isLogin) {
-      // 🔹 LOGIN
-      res = await axios.post(
-        `${API}/api/users/login`,
-        {
-          email: formData.email,
-          password: formData.password,
-        }
-      );
-    } else {
-      // 🔹 REGISTER
-      res = await axios.post(
-        `${API}/api/users/register`,
-        formData
-      );
+      if (isLogin) {
+        // 🔹 LOGIN
+        res = await axios.post(
+          `${API}/api/users/login`,
+          {
+            email: formData.email,
+            password: formData.password,
+          }
+        );
+      } else {
+        // 🔹 REGISTER
+        res = await axios.post(
+          `${API}/api/users/register`,
+          formData
+        );
+      }
+
+      // success
+      login(res.data.user);
+
+      // 🔥 SOCKET CONNECT + ONLINE
+      socket.connect();
+      socket.emit("addUser", res.data.user._id);
+
+      navigate("/chat");
+
+
+    } catch (err) {
+      console.log(err.response?.data);
+      alert(err.response?.data?.error || "Something went wrong");
     }
-
-    // success
-    login(res.data.user);
-    navigate("/chat");
-  
-
-  } catch (err) {
-    console.log(err.response?.data);
-    alert(err.response?.data?.error || "Something went wrong");
-  }
-};
+  };
 
 
   return (
@@ -116,7 +122,7 @@ const Login = () => {
         </p>
       </form>
 
-      
+
     </>
   )
 }

@@ -4,7 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import { socket } from "../socket";
 import ChatSidebar from "../components/ChatSidebar";
 import ChatWindow from "../components/ChatWindow";
-import { Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react'; 
 
 const Chat = () => {
   const { user, API } = useContext(AuthContext);
@@ -66,30 +66,35 @@ const Chat = () => {
 
   // user status listener
   useEffect(() => {
-    socket.on("allUsersStatus", (users) => {
-      console.log("STATUS:", users); // 👈 এটা add করো
-      const statusObj = {};
-      users.forEach(u => {
-        statusObj[u._id] = {
-          online: u.online,
-          lastSeen: u.lastSeen
-        };
-      });
-      setUserStatus(statusObj);
+  const handleStatus = (users) => {
+    const statusObj = {};
+    users.forEach(u => {
+      statusObj[u._id] = {
+        online: u.online,
+        lastSeen: u.lastSeen
+      };
     });
+    setUserStatus(statusObj);
+  };
 
-    return () => socket.off("allUsersStatus");
-  }, []);
+  socket.on("allUsersStatus", handleStatus);
+  return () => socket.off("allUsersStatus", handleStatus);
+}, []);
+
   useEffect(() => {
-    if (!user) return;
+  if (!user) return;
 
-    socket.on("connect", () => {
-      console.log("RECONNECTED");
-      socket.emit("addUser", user._id);
-    });
+  socket.connect(); // 🔹 ensure socket connected
 
-    return () => socket.off("connect");
-  }, [user]);
+  socket.emit("addUser", user._id); // 🔹 tell server user is online
+
+  socket.on("connect", () => {
+    console.log("SOCKET RECONNECTED");
+    socket.emit("addUser", user._id); // 🔹 reconnect after reload
+  });
+
+  return () => socket.off("connect");
+}, [user]);
 
   return (
     <div className="w-full flex h-screen backdrop-blur-sm border border-gray-800 rounded-2xl">
@@ -102,7 +107,7 @@ const Chat = () => {
 
       {sidebarOpen ?
         <X onClick={() => setSidebarOpen(false)} className='cursor-pointer absolute top-3 right-3 p-2 z-100 bg-white rounded-md shadow w-10 h-10 text-gray-600 sm:hidden' />
-        : <Menu onClick={() => setSidebarOpen(true)} className='cursor-pointer absolute top-3 right-3 p-2 z-100 bg-white rounded-md shadow w-10 h-10 text-gray-600 sm:hidden' />
+        : <Menu onClick={() => setSidebarOpen(true)} className=' absolute top-3 right-3 p-2 z-100 bg-white rounded-md shadow w-10 h-10 text-gray-600 sm:hidden' />
       }
 
       <ChatWindow
